@@ -15,6 +15,9 @@ class ViewController: UIViewController {
     @IBOutlet var image: UIImageView!
     
     @IBOutlet var searchTF: UITextField!
+    @IBOutlet var nextButton: UIButton!
+    @IBOutlet var backButton: UIButton!
+    
 
     let networkManager = NetworkManager()
     
@@ -36,26 +39,43 @@ class ViewController: UIViewController {
     }
     
     @IBAction func getRandomCocktail(_ sender: UIButton) {
+        index = 0
         var postfix = ""
         postfix = sender.tag == 0 ? "random.php" : "search.php?s=\(searchTF.text ?? "margarita")"
         //random.php
         networkManager.fetchCocktail(urlPostfix: postfix) {[unowned self] drink in
             self.drinks = drink
-            index = 0
             updateUI(cocktail: self.drinks?.drinks.first)
-        }
-        
-        if sender.tag == 2 {
-            index += 1
-            updateUI(cocktail: drinks?.drinks[index])
         }
     }
     
+    @IBAction func nextAndBack(_ sender: UIButton) {
+        if sender.tag == 1 {
+            index += 1
+            if index < drinks?.drinks.count ?? 0 {
+                updateUI(cocktail: drinks?.drinks[index])
+            } else {
+                index = 0
+            }
+        }
+        if sender.tag == 0 {
+            index -= 1
+            if index < drinks?.drinks.count ?? 0 && index >= 0{
+                updateUI(cocktail: drinks?.drinks[index])
+            } else {
+                index = 0
+            }
+        }
+    }
+    
+    
     func updateUI(cocktail: Cocktail?) {
-        DispatchQueue.main.async {
-            self.name.text = cocktail?.strDrink
-            self.cocktailDescription.text = cocktail?.strInstructions
-            self.ingredients.text = cocktail?.getIngredients()
+        DispatchQueue.main.async { [unowned self] in
+            nextButton.isEnabled = !(index == (drinks?.drinks.count ?? 0) - 1)
+            backButton.isEnabled = !((index == (drinks?.drinks.count ?? 0) - 1) || index == 0)
+            name.text = cocktail?.strDrink
+            cocktailDescription.text = cocktail?.strInstructions
+            ingredients.text = cocktail?.getIngredients()
         }
         guard let urlImage = cocktail?.strDrinkThumb else { return}
         networkManager.fetchImage(urlString: urlImage) {[unowned self] image in
