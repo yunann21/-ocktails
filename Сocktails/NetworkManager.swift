@@ -9,8 +9,8 @@ import Foundation
 import UIKit
 
 final class NetworkManager {
-    func fetchCocktail(completion: @escaping (Cocktail?) -> Void){
-        let url = URL(string: "https://www.thecocktaildb.com/api/json/v1/1/random.php")!
+    func fetchCocktail(urlPostfix: String, completion: @escaping (Drink?) -> Void){
+        let url = URL(string: "https://www.thecocktaildb.com/api/json/v1/1/" + urlPostfix)!
         URLSession.shared.dataTask(with: url) {  data, _, error in
             
             guard let data else {
@@ -19,7 +19,7 @@ final class NetworkManager {
             }
             do {
                 let drink = try JSONDecoder().decode(Drink.self, from: data)
-                completion(drink.drinks.first)
+                completion(drink)
             } catch {
                 print(error.localizedDescription)
             }
