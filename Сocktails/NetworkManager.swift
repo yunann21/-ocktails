@@ -5,7 +5,6 @@
 //  Created by Anna Ablogina on 10.04.2024.
 //
 
-import Foundation
 import UIKit
 
 final class NetworkManager {
@@ -23,8 +22,6 @@ final class NetworkManager {
             } catch {
                 print(error.localizedDescription)
             }
-            
-            
         }.resume()
     }
     
@@ -41,6 +38,23 @@ final class NetworkManager {
             let image = UIImage(data: data)
             completion(image)
 
+        }.resume()
+    }
+    
+    func fetchCategory(completion: @escaping (Categories?) -> Void){
+        let url = URL(string: "https://www.thecocktaildb.com/api/json/v1/1/list.php?c=list")!
+        URLSession.shared.dataTask(with: url) {  data, _, error in
+            
+            guard let data else {
+                print(error?.localizedDescription ?? "No error description")
+                return
+            }
+            do {
+                let category = try JSONDecoder().decode(Categories.self, from: data)
+                completion(category)
+            } catch {
+                print(error.localizedDescription)
+            }
         }.resume()
     }
 }

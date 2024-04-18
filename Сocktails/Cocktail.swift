@@ -11,6 +11,7 @@ struct Cocktail: Decodable {
     let strDrink: String
     let strInstructions: String
     let strDrinkThumb: String
+    let strCategory: String
     let strIngredient1: String?
     let strIngredient2: String?
     let strIngredient3: String?
@@ -30,6 +31,14 @@ struct Cocktail: Decodable {
 
 struct Drink: Decodable {
     let drinks: [Cocktail]
+}
+
+struct Category: Decodable {
+    let strCategory: String
+}
+
+struct Categories: Decodable {
+    let drinks: [Category]
 }
 
 

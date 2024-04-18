@@ -13,6 +13,7 @@ class ViewController: UIViewController {
     @IBOutlet var cocktailDescription: UITextView!
     @IBOutlet var ingredients: UITextView!
     @IBOutlet var image: UIImageView!
+    @IBOutlet var activityIndicator: UIActivityIndicatorView!
     
     @IBOutlet var searchTF: UITextField!
     @IBOutlet var nextButton: UIButton!
@@ -34,7 +35,7 @@ class ViewController: UIViewController {
         ingredients.layer.borderColor = UIColor.gray.cgColor
         ingredients.layer.cornerRadius = 10
         ingredients.layer.borderWidth = 1
-
+        
         getRandomCocktail(UIButton())
     }
     
@@ -50,39 +51,44 @@ class ViewController: UIViewController {
     }
     
     @IBAction func nextAndBack(_ sender: UIButton) {
-        if sender.tag == 1 {
-            index += 1
-            if index < drinks?.drinks.count ?? 0 {
-                updateUI(cocktail: drinks?.drinks[index])
-            } else {
-                index = 0
-            }
-        }
-        if sender.tag == 0 {
-            index -= 1
-            if index < drinks?.drinks.count ?? 0 && index >= 0{
-                updateUI(cocktail: drinks?.drinks[index])
-            } else {
-                index = 0
-            }
+        index += sender.tag
+        if index < drinks?.drinks.count ?? 0  && index >= 0{
+            updateUI(cocktail: drinks?.drinks[index])
+        } else {
+            index = 0
         }
     }
     
     
     func updateUI(cocktail: Cocktail?) {
         DispatchQueue.main.async { [unowned self] in
-            nextButton.isEnabled = !(index == (drinks?.drinks.count ?? 0) - 1)
-            backButton.isEnabled = !((index == (drinks?.drinks.count ?? 0) - 1) || index == 0)
+            image.image = nil
+            activityIndicator.startAnimating()
+            nextButton.isEnabled = index != (drinks?.drinks.count ?? 0) - 1
+            backButton.isEnabled = index != 0
             name.text = cocktail?.strDrink
             cocktailDescription.text = cocktail?.strInstructions
             ingredients.text = cocktail?.getIngredients()
         }
+        
         guard let urlImage = cocktail?.strDrinkThumb else { return}
         networkManager.fetchImage(urlString: urlImage) {[unowned self] image in
             DispatchQueue.main.async {
+                self.activityIndicator.stopAnimating()
                 self.image.image = image
             }
         }
     }
+    
+    @IBAction func getCategories(_ sender: UIBarButtonItem) {
+        networkManager.fetchCategory { categories in
+            DispatchQueue.main.async {
+                print(categories?.drinks.map({ category in
+                    category.strCategory
+                }))
+            }
+        }
+    }
+    
 }
 
